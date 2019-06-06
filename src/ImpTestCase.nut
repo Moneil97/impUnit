@@ -121,6 +121,20 @@ local ImpTestCase = class {
     }
   }
 
+   /**
+   * Assert that two values are within a certain float range
+   * @param {number|*} expected
+   * @param {number|*} actual
+   * @param {number|*} maxDiff
+   * @param {string} message
+   */
+  function assertCloseFloat(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
+    this.assertions++;
+    if (math.fabs(expected - actual) > maxDiff) {
+      throw format(message, expected + "", maxDiff + "", actual + "");
+    }
+  }
+
   /**
    * Perform a deep comparison of two values
    * @param {*} value1
