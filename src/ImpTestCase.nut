@@ -196,6 +196,20 @@ local ImpTestCase = class {
     this._assertDeepEqual(actual, expected, message, false); // backwards pass
   }
 
+
+  function assertNotDeepEqual(expected, actual, message = "Expected objects to differ") {
+        this.assertions++;
+
+        try {
+            this._assertDeepEqual(expected, actual, message, true); // forward pass
+            this._assertDeepEqual(actual, expected, message, false); // backwards pass
+        } catch (e) {
+            return;
+        }
+
+        throw message;
+    }
+
   /**
    * Assert that the value is between min amd max
    * @param {number|*} actual
