@@ -251,4 +251,37 @@ local ImpTestCase = class {
 
     throw message;
   }
+
+  function assertThrowsErrorContains(fn, ctx, args = [], errStrs = [], checkType = "any"){
+
+        this.assertions++;
+        args.insert(0, ctx)
+
+        try {
+            fn.pacall(args);
+        } 
+        catch (e) {
+            switch (checkType){
+                case "any":
+                    foreach (err in errStrs){
+                        if (e.find(err) != null){
+                            return e;
+                        }
+                    }
+                    throw "Function threw but did not contain any string in errStrs. Error was: " + e;
+                case "all":
+                    foreach (err in errStrs){
+                        if (e.find(err) == null){
+                            throw "Function threw but did not contain string: " + err + ". Error was: " + e;
+                        }
+                    }
+                    return e;
+                default:
+                    throw "checkType was expected to be either 'any' or 'all' but got : '" + checkType + "'";
+            }
+        }
+
+        throw "Function was expected to throw an error";
+    }
+    
 }
