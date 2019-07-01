@@ -8,15 +8,15 @@ class ImpTestCaseExtended extends ImpTestCase{
    * @param {number|*} maxDiff
    * @param {string} message
    */
-  function assertCloseFloat(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
-    this.assertions++;
-    if (math.fabs(expected - actual) > maxDiff) {
-      throw format(message, expected + "", maxDiff + "", actual + "");
+    function assertCloseFloat(expected, actual, maxDiff, message = "Expected value: %s±%s, got: %s") {
+        this.assertions++;
+        if (math.fabs(expected - actual) > maxDiff) {
+            throw format(message, expected + "", maxDiff + "", actual + "");
+        }
     }
-  }
 
 
-  function assertNotDeepEqual(expected, actual, message = "Expected objects to differ") {
+    function assertNotDeepEqual(expected, actual, message = "Expected objects to differ") {
         this.assertions++;
 
         try {
@@ -30,7 +30,7 @@ class ImpTestCaseExtended extends ImpTestCase{
     }
 
 
-  function assertThrowsErrorContains(fn, ctx, args = [], errStrs = [], checkType = "any"){
+    function assertThrowsErrorContains(fn, ctx, args = [], errStrs = [], checkType = "any"){
 
         this.assertions++;
         args.insert(0, ctx)
