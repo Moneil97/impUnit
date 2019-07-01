@@ -61,5 +61,82 @@ class ImpTestCaseExtended extends ImpTestCase{
 
         throw "Function was expected to throw an error";
     }
+
+    
+    // Override parent _assertDeepEqual to add blob support
+    // Slightly modified from: https://github.com/electricimp/impUnit/pull/11/files
+    function _assertDeepEqual(value1, value2, message, isForwardPass, path = "", level = 0) {
+        local cleanPath = @(p) p.len() == 0 ? p : p.slice(1);
+
+        if (level > 32) {
+            throw "Possible cyclic reference at " + cleanPath(path);
+        }
+
+        switch (type(value1)) {
+            case "table":
+            case "class":
+            case "array":
+
+                foreach (k, v in value1) {
+                    path += "." + k;
+
+                    if (!(k in value2)) {
+                        throw format(message, cleanPath(path),
+                        isForwardPass ? v + "" : "none",
+                        isForwardPass ? "none" : v + "");
+                    }
+
+                    this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
+                }
+                break;
+
+            case "meta":
+                this._deepEqualMeta(value1, value2, message, isForwardPass, path, level);
+                break;
+
+            case "null":
+                break;
+
+            default:
+                if (value2 != value1) {
+                    throw format(message, cleanPath(path), value1 + "", value2 + "");
+                }
+                break;
+        }
+    }
+
+    // Deep equal blob
+    function _deepEqualMeta(value1, value2, message, isForwardPass, path, level){
+        switch(typeof value1) {
+            case "blob":
+
+                if (value1.len() != value2.len()) {
+                    throw format("Blob lengths unequal, lhs.len() == %d, rhs.len() == %d", value1.len(), value2.len());
+                }
+
+                if (value1.len() > 0) {
+                    foreach (k, v in value1) {
+                        path += "." + k;
+
+                        if (!(k in value2)) {
+                            throw format("%s slot [%s] in actual value",
+                            isForwardPass ? "Missing" : "Extra", cleanPath(path));
+                        }
+
+                        this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
+                    }
+                }
+
+                break;
+
+            default:
+
+                if (value2 != value1) {
+                    throw format(message, cleanPath(path), value1 + "", value2 + "");
+                }
+
+                break;
+        }
+    }
     
 }
