@@ -72,7 +72,7 @@ class ImpTestCaseExtended extends ImpTestCase{
             throw "Possible cyclic reference at " + cleanPath(path);
         }
 
-        switch (type(value1)) {
+        switch (typeof(value1)) {
             case "table":
             case "class":
             case "array":
@@ -90,8 +90,8 @@ class ImpTestCaseExtended extends ImpTestCase{
                 }
                 break;
 
-            case "meta":
-                this._deepEqualMeta(value1, value2, message, isForwardPass, path, level);
+            case "blob":
+                this._assertDeepEqual(value1.tostring(), value2.tostring(), message, isForwardPass, path, level + 1);
                 break;
 
             case "null":
@@ -105,38 +105,4 @@ class ImpTestCaseExtended extends ImpTestCase{
         }
     }
 
-    // Deep equal blob
-    function _deepEqualMeta(value1, value2, message, isForwardPass, path, level){
-        switch(typeof value1) {
-            case "blob":
-
-                if (value1.len() != value2.len()) {
-                    throw format("Blob lengths unequal, lhs.len() == %d, rhs.len() == %d", value1.len(), value2.len());
-                }
-
-                if (value1.len() > 0) {
-                    foreach (k, v in value1) {
-                        path += "." + k;
-
-                        if (!(k in value2)) {
-                            throw format("%s slot [%s] in actual value",
-                            isForwardPass ? "Missing" : "Extra", cleanPath(path));
-                        }
-
-                        this._assertDeepEqual(value1[k], value2[k], message, isForwardPass, path, level + 1);
-                    }
-                }
-
-                break;
-
-            default:
-
-                if (value2 != value1) {
-                    throw format(message, cleanPath(path), value1 + "", value2 + "");
-                }
-
-                break;
-        }
-    }
-    
 }
