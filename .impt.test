@@ -1,0 +1,11 @@
+{
+  "deviceGroupId": "96934ae0-23c7-dde3-32a8-2b01c6a6d9d2",
+  "timeout": 30,
+  "stopOnFail": false,
+  "allowDisconnect": false,
+  "builderCache": true,
+  "testFiles": [
+    "*.test.nut",
+    "tests/**/*.test.nut"
+  ]
+}

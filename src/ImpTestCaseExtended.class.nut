@@ -1,4 +1,7 @@
 
+const ANY = "any";
+const ALL = "all";
+
 class ImpTestCaseExtended extends ImpTestCase{
 
    /**
@@ -29,8 +32,8 @@ class ImpTestCaseExtended extends ImpTestCase{
         throw message;
     }
 
-
-    function assertThrowsErrorContains(fn, ctx, args = [], errStrs = [], checkType = "any"){
+    
+    function assertThrowsErrorContains(fn, ctx, args = [], errStrs = [], checkType = ANY){
 
         this.assertions++;
         args.insert(0, ctx)
@@ -39,15 +42,19 @@ class ImpTestCaseExtended extends ImpTestCase{
             fn.pacall(args);
         } 
         catch (e) {
+
+            if (errStrs.len() == 0)
+                return e;
+
             switch (checkType){
-                case "any":
+                case ANY:
                     foreach (err in errStrs){
                         if (e.find(err) != null){
                             return e;
                         }
                     }
                     throw "Function threw but did not contain any string in errStrs. Error was: " + e;
-                case "all":
+                case ALL:
                     foreach (err in errStrs){
                         if (e.find(err) == null){
                             throw "Function threw but did not contain string: " + err + ". Error was: " + e;
