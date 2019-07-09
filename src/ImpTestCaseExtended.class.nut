@@ -62,21 +62,18 @@ class ImpTestCaseExtended extends ImpTestCase{
         throw "Function was expected to throw an error";
     }
 
-    
     // Override parent _assertDeepEqual to add blob support
-    // Slightly modified from: https://github.com/electricimp/impUnit/pull/11/files
     function _assertDeepEqual(value1, value2, message, isForwardPass, path = "", level = 0) {
         local cleanPath = @(p) p.len() == 0 ? p : p.slice(1);
 
-        if (level > 32) {
+        if (level > 32) 
             throw "Possible cyclic reference at " + cleanPath(path);
-        }
 
         switch (typeof(value1)) {
             case "table":
-            case "class":
             case "array":
-
+            case "class":
+            
                 foreach (k, v in value1) {
                     path += "." + k;
 
@@ -98,11 +95,62 @@ class ImpTestCaseExtended extends ImpTestCase{
                 break;
 
             default:
-                if (value2 != value1) {
+                if (value2 != value1) 
                     throw format(message, cleanPath(path), value1 + "", value2 + "");
-                }
                 break;
         }
     }
 
+    function _assertLengthEqual(value1, value2, path){
+        if (value1.len() != value2.len())
+            throw format("Comparison failed on '%s': value1.len() == %d but value2.len() == %d.", path, value1.len(), value2.len());
+    }
+
+    function assertDeepEqual2(expected, actual, maxLevels=32) {
+        this.assertions++;
+        this._assertDeepEqual2(expected, actual, maxLevels, true); // forward pass
+        this._assertDeepEqual2(actual, expected, maxLevels, false); // backwards pass
+    }
+
+    function _assertDeepEqual2(value1, value2, maxLevels, isForwardPass, path = "obj", level = 0) {
+
+        if (level > maxLevels) 
+            throw "Possible cyclic reference at " + path;
+
+        local type1 = typeof(value1);
+        local type2 = typeof(value2);
+        if (type1 != type2)
+            throw format("Comparison failed on '%s': value1 is of type %s but value2 is of type %s.", path, type1, type2);
+
+        switch (type1) {
+            
+            case "table":
+                this._assertLengthEqual(value1, value2, path);
+            case "class":
+                foreach (k, v in value1) {
+                    if (!(k in value2)) 
+                        throw format("Comparison failed on '%s': expected %s, got %s", path, isForwardPass ? v + "" : "none", isForwardPass ? "none" : v + "");
+
+                    this._assertDeepEqual2(value1[k], value2[k], maxLevels, isForwardPass, path + format(".%s", k), level + 1);
+                }
+                break;
+
+            case "array":
+            case "blob":
+                this._assertLengthEqual(value1, value2, path);
+
+                foreach(i,v in value1)
+                    this._assertDeepEqual2(v, value2[i], maxLevels, isForwardPass, path + format("[%d]", i), level + 1);
+                break;
+
+            case "null":
+                break;
+
+            default:
+                if (value2 != value1) 
+                    throw format("Comparison failed on '%s': expected %s, got %s", path, value1 + "", value2 + "");
+                break;
+        }
+    }
+    
 }
